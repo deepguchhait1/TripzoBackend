@@ -3,14 +3,12 @@ const dns = require("dns");
 
 dns.setDefaultResultOrder("ipv4first");
 
+// Use Gmail SMTP for local development
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4,   // force IPv4
+  service: "gmail",
   auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
+    user: process.env.SMTP_EMAIL, // your Gmail address
+    pass: process.env.SMTP_PASSWORD, // your Gmail app password
   },
 });
 transporter.verify().then(() => {
