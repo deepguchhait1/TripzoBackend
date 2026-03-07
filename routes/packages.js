@@ -98,7 +98,7 @@ router.post("/", auth, async (req, res) => {
 router.put("/:id", auth, async (req, res) => {
   try {
     const pkg = await Package.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!pkg) return res.status(404).json({ message: "Not found" });

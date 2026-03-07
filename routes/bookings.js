@@ -85,7 +85,7 @@ router.put("/:id", auth, async (req, res) => {
       updateData.handledBy = req.admin._id;
     }
     const booking = await Booking.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
     });
 
     // Send status update email if status changed

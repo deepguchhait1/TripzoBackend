@@ -51,7 +51,7 @@ router.post("/", auth, async (req, res) => {
 router.put("/:id", auth, async (req, res) => {
   try {
     const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
     if (!blog) return res.status(404).json({ message: "Not found" });

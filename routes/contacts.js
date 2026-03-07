@@ -81,7 +81,7 @@ router.put("/:id", auth, async (req, res) => {
       updateData.handledBy = req.admin._id;
     }
     const contact = await Contact.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
     });
     res.json(contact);
   } catch (error) {

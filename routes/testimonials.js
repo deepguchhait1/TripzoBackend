@@ -69,7 +69,7 @@ router.put("/:id", auth, async (req, res) => {
     const testimonial = await Testimonial.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     if (!testimonial) return res.status(404).json({ message: "Not found" });
     res.json(testimonial);
