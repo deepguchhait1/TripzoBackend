@@ -13,13 +13,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASSWORD,
   },
 });
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("SMTP Error:", error);
-  } else {
-    console.log("SMTP Ready");
-  }
-});
 transporter.verify().then(() => {
   console.log("✉️  Email service ready");
 }).catch((err) => {
