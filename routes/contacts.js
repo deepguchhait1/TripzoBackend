@@ -1,12 +1,8 @@
-const express = require("express");
+import express from "express";
+import Contact from "../models/Contact.js";
+import auth from "../middleware/auth.js";
+import { sendContactAcknowledgement, sendAdminContactAlert, sendContactReply } from "../services/emailService.js";
 const router = express.Router();
-const Contact = require("../models/Contact");
-const auth = require("../middleware/auth");
-const {
-  sendContactAcknowledgement,
-  sendAdminContactAlert,
-  sendContactReply,
-} = require("../services/emailService");
 
 // POST /api/contacts — Public (submit contact form)
 router.post("/", async (req, res) => {
@@ -100,4 +96,4 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

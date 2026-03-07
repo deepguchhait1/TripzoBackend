@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
+import Package from "../models/Package.js";
+import Subscriber from "../models/Subscriber.js";
+import auth from "../middleware/auth.js";
+import { sendNewPackageNotification } from "../services/emailService.js";
 const router = express.Router();
-const Package = require("../models/Package");
-const Subscriber = require("../models/Subscriber");
-const auth = require("../middleware/auth");
-const { sendNewPackageNotification } = require("../services/emailService");
 
 // GET /api/packages — Public
 router.get("/", async (req, res) => {
@@ -119,4 +119,4 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

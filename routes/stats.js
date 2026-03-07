@@ -1,13 +1,13 @@
-const express = require("express");
+import express from "express";
+import auth from "../middleware/auth.js";
+import Destination from "../models/Destination.js";
+import Package from "../models/Package.js";
+import Testimonial from "../models/Testimonial.js";
+import Blog from "../models/Blog.js";
+import Contact from "../models/Contact.js";
+import Booking from "../models/Booking.js";
+import Subscriber from "../models/Subscriber.js";
 const router = express.Router();
-const auth = require("../middleware/auth");
-const Destination = require("../models/Destination");
-const Package = require("../models/Package");
-const Testimonial = require("../models/Testimonial");
-const Blog = require("../models/Blog");
-const Contact = require("../models/Contact");
-const Booking = require("../models/Booking");
-const Subscriber = require("../models/Subscriber");
 
 // GET /api/stats/public — Public homepage stats
 router.get("/public", async (req, res) => {
@@ -76,4 +76,4 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

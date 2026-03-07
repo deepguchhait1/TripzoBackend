@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
+import { sendOtpEmail } from "../services/emailService.js";
 const router = express.Router();
-const { sendOtpEmail } = require("../services/emailService");
 
 // In-memory OTP store: { email: { otp, expiresAt } }
 const otpStore = new Map();
@@ -74,4 +74,4 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

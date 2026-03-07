@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
+import Destination from "../models/Destination.js";
+import Package from "../models/Package.js";
 const router = express.Router();
-const Destination = require("../models/Destination");
-const Package = require("../models/Package");
 
 // GET /api/search?q=keyword — Global search across destinations & packages
 router.get("/", async (req, res) => {
@@ -132,4 +132,4 @@ router.get("/suggestions", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const packageSchema = new mongoose.Schema(
   {
@@ -25,4 +25,5 @@ const packageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Package", packageSchema);
+const Package = mongoose.model("Package", packageSchema);
+export default Package;

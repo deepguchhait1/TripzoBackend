@@ -1,4 +1,4 @@
-const auth = require("./auth");
+import auth from "./auth.js";
 
 /**
  * Middleware: Ensures the user is authenticated AND has the "superadmin" role.
@@ -14,4 +14,4 @@ const superadmin = [
   },
 ];
 
-module.exports = superadmin;
+export default superadmin;

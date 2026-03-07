@@ -1,5 +1,7 @@
-const nodemailer = require("nodemailer");
-const dns = require("dns");
+import "dotenv/config";
+dns.setDefaultResultOrder("ipv4first");
+import nodemailer from "nodemailer";
+import dns from "dns";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -12,6 +14,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_EMAIL, // your Gmail address
     pass: process.env.SMTP_PASSWORD, // your Gmail app password
   },
+  family: 4, // Force IPv4 to avoid ENETUNREACH errors
 });
 transporter.verify().then(() => {
   console.log("✉️  Email service ready");
@@ -774,7 +777,7 @@ const sendNewsletterEmail = async (email, subject, body) => {
   });
 };
 
-module.exports = {
+export {
   sendBookingConfirmation,
   sendBookingStatusUpdate,
   sendAdminNewBookingAlert,

@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import Subscriber from "../models/Subscriber.js";
+import auth from "../middleware/auth.js";
+import { sendSubscriptionConfirmation, sendNewsletterEmail } from "../services/emailService.js";
 const router = express.Router();
-const Subscriber = require("../models/Subscriber");
-const auth = require("../middleware/auth");
-const { sendSubscriptionConfirmation, sendNewsletterEmail } = require("../services/emailService");
 
 // POST /api/subscribers — Public (subscribe)
 router.post("/", async (req, res) => {
@@ -122,4 +122,4 @@ router.post("/send-email", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

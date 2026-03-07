@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
+import Testimonial from "../models/Testimonial.js";
+import auth from "../middleware/auth.js";
 const router = express.Router();
-const Testimonial = require("../models/Testimonial");
-const auth = require("../middleware/auth");
 
 // GET /api/testimonials — Public
 router.get("/", async (req, res) => {
@@ -89,4 +89,4 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

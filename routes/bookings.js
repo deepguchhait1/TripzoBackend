@@ -1,13 +1,8 @@
-const express = require("express");
+import express from "express";
+import Booking from "../models/Booking.js";
+import auth from "../middleware/auth.js";
+import { sendBookingConfirmation, sendBookingStatusUpdate, sendAdminNewBookingAlert, sendBookingReply } from "../services/emailService.js";
 const router = express.Router();
-const Booking = require("../models/Booking");
-const auth = require("../middleware/auth");
-const {
-  sendBookingConfirmation,
-  sendBookingStatusUpdate,
-  sendAdminNewBookingAlert,
-  sendBookingReply,
-} = require("../services/emailService");
 
 // POST /api/bookings — Public (submit booking)
 router.post("/", async (req, res) => {
@@ -138,4 +133,4 @@ router.post("/:id/email", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

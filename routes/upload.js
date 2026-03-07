@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import multer from "multer";
+import cloudinary from "../config/cloudinary.js";
+import auth from "../middleware/auth.js";
 const router = express.Router();
-const multer = require("multer");
-const cloudinary = require("../config/cloudinary");
-const auth = require("../middleware/auth");
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -61,4 +61,4 @@ router.post("/", auth, (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

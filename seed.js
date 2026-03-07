@@ -1,13 +1,14 @@
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 dotenv.config();
 
-const Admin = require("./models/Admin");
-const Destination = require("./models/Destination");
-const Package = require("./models/Package");
-const Testimonial = require("./models/Testimonial");
-const Blog = require("./models/Blog");
-const Subscriber = require("./models/Subscriber");
+import Admin from "./models/Admin.js";
+import Destination from "./models/Destination.js";
+import Package from "./models/Package.js";
+import Testimonial from "./models/Testimonial.js";
+import Blog from "./models/Blog.js";
+import Subscriber from "./models/Subscriber.js";
 
 const destinations = [
   {
@@ -1548,11 +1549,19 @@ async function seed() {
     console.log(`Seeded ${subscribers.length} subscribers`);
 
     console.log("\nSeed completed successfully!");
-    process.exit(0);
+    // Only exit if running directly
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      process.exit(0);
+    }
   } catch (error) {
     console.error("Seed error:", error.message);
-    process.exit(1);
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      process.exit(1);
+    }
   }
 }
 
-seed();
+// Only run seed if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  seed();
+}

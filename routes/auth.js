@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
+import jwt from "jsonwebtoken";
+import Admin from "../models/Admin.js";
+import auth from "../middleware/auth.js";
 const router = express.Router();
-const jwt = require("jsonwebtoken");
-const Admin = require("../models/Admin");
-const auth = require("../middleware/auth");
 
 // GET /api/auth/setup-status — check if any admin exists
 router.get("/setup-status", async (req, res) => {
@@ -159,4 +159,4 @@ router.put("/password", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

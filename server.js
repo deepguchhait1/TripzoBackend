@@ -1,10 +1,28 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const path = require("path");
+dotenv.config();
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import authRoutes from "./routes/auth.js";
+import adminsRoutes from "./routes/admins.js";
+import destinationsRoutes from "./routes/destinations.js";
+import packagesRoutes from "./routes/packages.js";
+import testimonialsRoutes from "./routes/testimonials.js";
+import blogsRoutes from "./routes/blogs.js";
+import contactsRoutes from "./routes/contacts.js";
+import bookingsRoutes from "./routes/bookings.js";
+import statsRoutes from "./routes/stats.js";
+import searchRoutes from "./routes/search.js";
+import subscribersRoutes from "./routes/subscribers.js";
+import uploadRoutes from "./routes/upload.js";
 
 const app = express();
 
@@ -24,18 +42,18 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/admins", require("./routes/admins"));
-app.use("/api/destinations", require("./routes/destinations"));
-app.use("/api/packages", require("./routes/packages"));
-app.use("/api/testimonials", require("./routes/testimonials"));
-app.use("/api/blogs", require("./routes/blogs"));
-app.use("/api/contacts", require("./routes/contacts"));
-app.use("/api/bookings", require("./routes/bookings"));
-app.use("/api/stats", require("./routes/stats"));
-app.use("/api/search", require("./routes/search"));
-app.use("/api/subscribers", require("./routes/subscribers"));
-app.use("/api/upload", require("./routes/upload"));
+app.use("/api/auth", authRoutes);
+app.use("/api/admins", adminsRoutes);
+app.use("/api/destinations", destinationsRoutes);
+app.use("/api/packages", packagesRoutes);
+app.use("/api/testimonials", testimonialsRoutes);
+app.use("/api/blogs", blogsRoutes);
+app.use("/api/contacts", contactsRoutes);
+app.use("/api/bookings", bookingsRoutes);
+app.use("/api/stats", statsRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/subscribers", subscribersRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

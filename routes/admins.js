@@ -1,10 +1,10 @@
-const express = require("express");
+import express from "express";
+import Admin from "../models/Admin.js";
+import Booking from "../models/Booking.js";
+import Contact from "../models/Contact.js";
+import auth from "../middleware/auth.js";
+import superadmin from "../middleware/superadmin.js";
 const router = express.Router();
-const Admin = require("../models/Admin");
-const Booking = require("../models/Booking");
-const Contact = require("../models/Contact");
-const auth = require("../middleware/auth");
-const superadmin = require("../middleware/superadmin");
 
 // GET /api/admins — List all admins (any admin can see the team)
 router.get("/", auth, async (req, res) => {
@@ -287,4 +287,4 @@ router.delete("/:id", superadmin, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
