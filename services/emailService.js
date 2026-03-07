@@ -75,17 +75,11 @@ ${preheader ? `<div style="display:none;font-size:1px;color:#f0f2f5;line-height:
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td style="vertical-align:middle;">
-            <table role="presentation" cellpadding="0" cellspacing="0">
-              <tr>
-                <td style="vertical-align:middle;padding-right:12px;">
-                  <img src="${BRAND.logo}" alt="${BRAND.name}" width="44" height="44" style="width:44px;height:44px;border-radius:12px;object-fit:cover;border:2px solid #00BC7D;display:block;" />
-                </td>
-                <td style="vertical-align:middle;">
-                  <h1 style="margin:0;font-size:24px;font-weight:800;color:${BRAND.color.dark};letter-spacing:-0.5px;">${BRAND.name}</h1>
-                  <p style="margin:2px 0 0;font-size:12px;color:${BRAND.color.muted};letter-spacing:0.3px;">${BRAND.tagline}</p>
-                </td>
-              </tr>
-            </table>
+            <span style="font-size:36px;vertical-align:middle;">${headerIcon}</span>
+          </td>
+          <td style="vertical-align:middle;padding-left:16px;">
+            <h1 style="margin:0;font-size:24px;font-weight:800;color:${BRAND.color.dark};letter-spacing:-0.5px;">${BRAND.name}</h1>
+            <p style="margin:2px 0 0;font-size:12px;color:${BRAND.color.muted};letter-spacing:0.3px;">${BRAND.tagline}</p>
           </td>
           <td align="right" style="vertical-align:middle;">
             <a href="${BRAND.url}" style="display:inline-block;font-size:12px;font-weight:600;color:${BRAND.color.primary};text-decoration:none;padding:8px 16px;border:1.5px solid ${BRAND.color.primary};border-radius:8px;">Visit Website</a>
