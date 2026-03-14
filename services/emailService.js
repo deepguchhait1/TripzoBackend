@@ -31,19 +31,20 @@ const BRAND = {
   address: "123 Travel Tower, Connaught Place, New Delhi",
 };
 
-// ───── Ticket Color Palette (travel ticket: muted orange/beige + black stub) ─────
+// ───── Ticket Color Palette ─────
 const TICKET = {
-  gold:      "#D4A574",
-  goldDark:  "#B8956A",
-  goldPale:  "#F5E6D3",
+  gold:      "#E8A317",
+  goldDark:  "#C8860A",
+  goldPale:  "#FDF3D0",
   stub:      "#1A1A1A",
   stubMuted: "rgba(255,255,255,0.65)",
-  border:    "#B8956A",
-  paper:     "#E8D4B8",
+  border:    "#C8860A",
   serif:     "Georgia,'Times New Roman',Times,serif",
   mono:      "'Courier New',Courier,monospace",
-  // Scalloped (torn paper) edge — semicircle radius in px
-  scallop:   6,
+  // Torn/perforated ticket edge: semicircle radius and strip thickness (evenly spaced cutouts)
+  scallop:   8,
+  scallopH:  10, // strip height for top/bottom edges (px)
+  scallopW:  10, // strip width for left/right edges (px)
 };
 
 // ───── SVG Icon Library ─────
@@ -102,42 +103,45 @@ const baseTemplate = (content, preheader = "", headerIconSvg = ICONS.plane) => `
 <!--[if mso]><style>table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
 <style>
   @media only screen and (max-width: 600px) {
+    body { -webkit-text-size-adjust: 100% !important; text-size-adjust: 100% !important; }
     .email-main-table { max-width: 100% !important; width: 100% !important; }
     .email-scallop-edge { display: none !important; }
-    .email-padding { padding: 8px !important; }
-    .email-content { padding: 8px !important; }
-    .email-footer { padding: 8px !important; }
+    .email-padding { padding: 12px 10px !important; }
+    .email-content { padding: 18px 14px 20px !important; }
+    .email-footer { padding: 14px 14px 18px !important; }
     .email-hide-mobile { display: none !important; }
     .email-body-td { padding: 0 !important; }
     .email-serial { display: none !important; }
-    .email-stub { width: 40px !important; }
-    .email-perf { width: 4px !important; }
-    .email-header { font-size: 22px !important; }
-    .email-btn { padding: 14px 24px !important; font-size: 16px !important; border-radius: 12px !important; }
-    .email-main-table td, .email-main-table p, .email-main-table h2, .email-main-table a {
-      font-size: 16px !important;
-      line-height: 1.5 !important;
-    }
-    .email-main-table h2 {
-      font-size: 20px !important;
-      margin-bottom: 12px !important;
-    }
-    .email-main-table .email-footer p {
-      font-size: 13px !important;
-    }
-    .email-main-table .email-footer a {
-      font-size: 15px !important;
-    }
-    .email-main-table .email-hide-mobile {
-      display: none !important;
-    }
-    .email-main-table .email-icons {
-      display: none !important;
-    }
-    .email-main-table .email-btn {
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
+    .email-stub { width: 36px !important; min-width: 36px !important; }
+    .email-perf { width: 6px !important; min-width: 6px !important; }
+    .email-header-cell { padding: 12px 14px 8px !important; }
+    .email-ticket-title { font-size: 28px !important; letter-spacing: 2px !important; line-height: 1.1 !important; }
+    .email-tagline { font-size: 9px !important; letter-spacing: 1px !important; margin-top: 6px !important; }
+    .email-btn { padding: 14px 24px !important; font-size: 15px !important; border-radius: 10px !important; width: 100% !important; max-width: 280px !important; box-sizing: border-box !important; text-align: center !important; }
+    .email-main-table td, .email-main-table p { line-height: 1.55 !important; }
+    .email-main-table h2 { font-size: 20px !important; line-height: 1.3 !important; margin-bottom: 10px !important; font-weight: 800 !important; }
+    .email-main-table h3 { font-size: 17px !important; line-height: 1.35 !important; margin-bottom: 8px !important; }
+    .email-main-table .email-content p { font-size: 15px !important; line-height: 1.6 !important; }
+    .email-main-table .email-content a { font-size: 15px !important; }
+    .email-main-table .email-footer p { font-size: 12px !important; line-height: 1.5 !important; }
+    .email-main-table .email-footer a { font-size: 13px !important; }
+    .email-main-table .email-hide-mobile { display: none !important; }
+    .email-main-table .email-icons { display: none !important; }
+    .email-stub-brand { font-size: 14px !important; letter-spacing: 1px !important; }
+    .email-stub-admit { font-size: 8px !important; letter-spacing: 1px !important; }
+    .email-stub-icon-wrap { width: 36px !important; height: 36px !important; line-height: 36px !important; border-radius: 8px !important; }
+    .email-footer-social { margin-bottom: 12px !important; }
+    .email-footer-social a { width: 32px !important; height: 32px !important; line-height: 32px !important; font-size: 11px !important; }
+    .email-info-row { padding: 10px 12px !important; font-size: 14px !important; }
+    .email-info-row div:first-child { min-width: 90px !important; }
+    .email-info-row div:last-child { font-size: 14px !important; word-break: break-word !important; }
+    .email-section-title { font-size: 11px !important; margin: 14px 0 10px !important; padding-bottom: 6px !important; }
+    .email-alert-box { padding: 12px 14px !important; font-size: 14px !important; line-height: 1.55 !important; margin: 14px 0 !important; }
+    .email-step-item { padding: 10px 0 !important; font-size: 14px !important; }
+    .email-status-badge { font-size: 12px !important; padding: 6px 12px !important; }
+    .email-ticket-title-cell { padding: 8px 14px 6px !important; }
+    .email-dashed-cell { padding-left: 14px !important; padding-right: 14px !important; }
+    .email-bottom-stars { padding: 8px 14px 12px !important; }
   }
 </style>
 </head>
@@ -147,18 +151,15 @@ ${preheader ? `<div style="display:none;font-size:1px;line-height:1px;max-height
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;min-height:100vh;">
 <tr><td align="center" class="email-padding" style="padding:40px 16px;">
 
-<!-- Scalloped (torn paper) border wrapper -->
-<table role="presentation" cellpadding="0" cellspacing="0" align="center" class="email-main-table" style="max-width:680px;width:100%;">
-  <!-- Top scalloped edge (torn paper) -->
+<!-- Outer border: torn/perforated ticket edge (semicircular cutouts, white showing through) -->
+<table role="presentation" cellpadding="0" cellspacing="0" align="center" class="email-main-table" style="max-width:696px;width:100%;">
   <tr>
-    <td class="email-scallop-edge" style="height:${TICKET.scallop + 2}px;background:${TICKET.gold};background-image:radial-gradient(circle at 50% 100%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-position:0 0;line-height:0;font-size:0;" colspan="3"></td>
+    <td class="email-scallop-edge" style="height:${TICKET.scallopH}px;background:${TICKET.gold};background-image:radial-gradient(circle at 50% 100%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-repeat:repeat-x;line-height:0;font-size:0;" colspan="3"></td>
   </tr>
   <tr>
-    <!-- Left scalloped edge (stub side) -->
-    <td class="email-scallop-edge" style="width:${TICKET.scallop + 2}px;background:${TICKET.stub};background-image:radial-gradient(circle at 100% 50%, transparent ${TICKET.scallop}px, ${TICKET.stub} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-position:0 0;vertical-align:top;"></td>
-    <!-- Ticket content -->
+    <td class="email-scallop-edge" style="width:${TICKET.scallopW}px;background:${TICKET.stub};background-image:radial-gradient(circle at 100% 50%, transparent ${TICKET.scallop}px, ${TICKET.stub} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-repeat:repeat-y;vertical-align:top;"></td>
     <td style="padding:0;vertical-align:top;">
-<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="box-shadow:0 20px 60px rgba(0,0,0,0.25),0 0 0 2px ${TICKET.goldDark};">
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.25),0 0 0 2px ${TICKET.goldDark};">
 <tr>
 
   <!-- LEFT STUB -->
@@ -166,13 +167,13 @@ ${preheader ? `<div style="display:none;font-size:1px;line-height:1px;max-height
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="height:100%;">
       <tr><td style="padding:18px 0 10px;text-align:center;">${starRow(TICKET.gold, 5)}</td></tr>
       <tr><td style="padding:20px 0;text-align:center;vertical-align:middle;">
-        <p style="margin:0;font-size:22px;font-weight:900;color:${TICKET.gold};font-family:${TICKET.serif};letter-spacing:3px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);text-transform:uppercase;">${BRAND.name}</p>
+        <p class="email-stub-brand" style="margin:0;font-size:22px;font-weight:900;color:${TICKET.gold};font-family:${TICKET.serif};letter-spacing:3px;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);text-transform:uppercase;">${BRAND.name}</p>
       </td></tr>
       <tr><td style="padding:10px 0;text-align:center;">
-        <p style="margin:0;font-size:9px;font-weight:700;color:${TICKET.stubMuted};letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);">ADMIT ONE</p>
+        <p class="email-stub-admit" style="margin:0;font-size:9px;font-weight:700;color:${TICKET.stubMuted};letter-spacing:3px;text-transform:uppercase;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);">ADMIT ONE</p>
       </td></tr>
       <tr><td style="padding:16px 0;text-align:center;">
-        <div style="display:inline-block;width:44px;height:44px;background:${TICKET.gold};border-radius:10px;text-align:center;line-height:44px;">${headerIconSvg}</div>
+        <div class="email-stub-icon-wrap" style="display:inline-block;width:44px;height:44px;background:${TICKET.gold};border-radius:10px;text-align:center;line-height:44px;">${headerIconSvg}</div>
       </td></tr>
       <tr><td style="padding:10px 0 18px;text-align:center;">${starRow(TICKET.gold, 5)}</td></tr>
     </table>
@@ -191,32 +192,27 @@ ${preheader ? `<div style="display:none;font-size:1px;line-height:1px;max-height
   <td style="background:${TICKET.gold};padding:0;vertical-align:top;" class="email-body-td">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 
-      <tr><td style="padding:14px 28px 6px;text-align:center;" class="email-header">
-        <p style="margin:0;">${starRow(TICKET.stub, 5)}</p>
+      <tr><td style="padding:14px 28px 8px;text-align:center;border-bottom:2px solid ${TICKET.goldDark};" class="email-header email-header-cell">
+        <p style="margin:0;">${starRow(TICKET.stub, 9)}</p>
       </td></tr>
-      <tr><td style="padding:0 28px 4px;text-align:center;">
-        <p style="margin:0;font-size:8px;letter-spacing:4px;color:${TICKET.stub};line-height:1;">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</p>
+
+      <tr><td class="email-ticket-title-cell" style="padding:10px 28px 4px;text-align:center;">
+        <p class="email-ticket-title" style="margin:0;font-size:44px;font-weight:900;color:${TICKET.stub};letter-spacing:6px;font-family:${TICKET.serif};text-transform:uppercase;line-height:1;">TICKET</p>
+        <p class="email-tagline" style="margin:4px 0 0;font-size:10px;font-weight:700;color:${TICKET.goldDark};letter-spacing:2px;text-transform:uppercase;">${BRAND.tagline}</p>
       </td></tr>
-      <tr><td style="padding:6px 28px 4px;text-align:center;">
-        <p style="margin:0;font-size:44px;font-weight:900;color:${TICKET.stub};letter-spacing:6px;font-family:${TICKET.serif};text-transform:uppercase;line-height:1;">TICKET</p>
-        <p style="margin:4px 0 0;font-size:10px;font-weight:700;color:${TICKET.goldDark};letter-spacing:2px;text-transform:uppercase;">${BRAND.tagline}</p>
-      </td></tr>
-      <tr><td style="padding:4px 28px 8px;text-align:center;">
-        <p style="margin:0;font-size:8px;letter-spacing:4px;color:${TICKET.stub};line-height:1;">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</p>
-      </td></tr>
-      <tr><td style="padding:0 28px 8px;text-align:center;"><p style="margin:0;">${starRow(TICKET.stub, 5)}</p></td></tr>
-      <tr><td style="padding:0 28px 8px;"><div style="border-top:1px dashed ${TICKET.goldDark};"></div></td></tr>
+
+      <tr><td class="email-dashed-cell" style="padding:8px 28px;"><div style="border-top:1px dashed ${TICKET.goldDark};"></div></td></tr>
 
       <!-- CONTENT -->
       <tr><td style="padding:24px 28px 28px;background:${TICKET.goldPale};" class="email-content">
         ${content}
       </td></tr>
 
-      <tr><td style="padding:8px 28px;background:${TICKET.goldPale};"><div style="border-top:1px dashed ${TICKET.border};"></div></td></tr>
+      <tr><td class="email-dashed-cell" style="padding:8px 28px;background:${TICKET.goldPale};"><div style="border-top:1px dashed ${TICKET.border};"></div></td></tr>
 
       <!-- FOOTER -->
       <tr><td style="padding:16px 28px 14px;background:${TICKET.goldPale};text-align:center;" class="email-footer">
-        <div style="margin-bottom:10px;">
+        <div class="email-footer-social" style="margin-bottom:10px;">
           <a href="#" style="display:inline-block;width:28px;height:28px;background:${TICKET.gold};border-radius:6px;text-align:center;line-height:28px;font-size:10px;text-decoration:none;color:${TICKET.stub};font-weight:800;border:1px solid ${TICKET.goldDark};margin:0 3px;">f</a>
           <a href="#" style="display:inline-block;width:28px;height:28px;background:${TICKET.gold};border-radius:6px;text-align:center;line-height:28px;font-size:10px;text-decoration:none;color:${TICKET.stub};font-weight:800;border:1px solid ${TICKET.goldDark};margin:0 3px;">in</a>
           <a href="#" style="display:inline-block;width:28px;height:28px;background:${TICKET.gold};border-radius:6px;text-align:center;line-height:28px;font-size:10px;text-decoration:none;color:${TICKET.stub};font-weight:800;border:1px solid ${TICKET.goldDark};margin:0 3px;">ig</a>
@@ -231,7 +227,7 @@ ${preheader ? `<div style="display:none;font-size:1px;line-height:1px;max-height
         <p style="margin:0;font-size:10px;color:${TICKET.goldDark};">&copy; ${new Date().getFullYear()} ${BRAND.name}. All rights reserved.</p>
       </td></tr>
 
-      <tr><td style="padding:8px 28px 14px;text-align:center;background:${TICKET.gold};border-top:2px solid ${TICKET.goldDark};">
+      <tr><td class="email-bottom-stars" style="padding:8px 28px 14px;text-align:center;background:${TICKET.gold};border-top:2px solid ${TICKET.goldDark};">
         <p style="margin:0;">${starRow(TICKET.stub, 9)}</p>
       </td></tr>
 
@@ -244,12 +240,10 @@ ${preheader ? `<div style="display:none;font-size:1px;line-height:1px;max-height
 </tr>
 </table>
     </td>
-    <!-- Right scalloped edge -->
-    <td class="email-scallop-edge" style="width:${TICKET.scallop + 2}px;background:${TICKET.gold};background-image:radial-gradient(circle at 0% 50%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-position:0 0;vertical-align:top;"></td>
+    <td class="email-scallop-edge" style="width:${TICKET.scallopW}px;background:${TICKET.gold};background-image:radial-gradient(circle at 0% 50%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-repeat:repeat-y;vertical-align:top;"></td>
   </tr>
-  <!-- Bottom scalloped edge (torn paper) -->
   <tr>
-    <td class="email-scallop-edge" style="height:${TICKET.scallop + 2}px;background:${TICKET.gold};background-image:radial-gradient(circle at 50% 0%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-position:0 0;line-height:0;font-size:0;" colspan="3"></td>
+    <td class="email-scallop-edge" style="height:${TICKET.scallopH}px;background:${TICKET.gold};background-image:radial-gradient(circle at 50% 0%, transparent ${TICKET.scallop}px, ${TICKET.gold} ${TICKET.scallop}px);background-size:${TICKET.scallop * 2}px ${TICKET.scallop * 2}px;background-repeat:repeat-x;line-height:0;font-size:0;" colspan="3"></td>
   </tr>
 </table>
 
@@ -273,7 +267,7 @@ const statusConfig = {
 
 const statusBadge = (status) => {
   const s = statusConfig[status] || statusConfig.pending;
-  return `<span style="display:inline-flex;align-items:center;gap:5px;background:${s.badge};color:${s.text};font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:0.8px;">${s.svgIcon} ${s.label}</span>`;
+  return `<span class="email-status-badge" style="display:inline-flex;align-items:center;gap:5px;background:${s.badge};color:${s.text};font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:0.8px;">${s.svgIcon} ${s.label}</span>`;
 };
 
 const formatDate = (d) => {
@@ -283,13 +277,13 @@ const formatDate = (d) => {
 
 // Section title — pure div, no table
 const sectionTitle = (title) => `
-<div style="margin:16px 0 12px;padding-bottom:8px;border-bottom:2px solid ${TICKET.goldDark};">
+<div class="email-section-title" style="margin:16px 0 12px;padding-bottom:8px;border-bottom:2px solid ${TICKET.goldDark};">
   <p style="margin:0;font-size:10px;font-weight:800;color:${TICKET.goldDark};text-transform:uppercase;letter-spacing:2px;font-family:${TICKET.serif};">${title}</p>
 </div>`;
 
 // Info row — div flex row (no table)
 const infoRow = (label, value, iconSvg = "") => `
-<div style="display:flex;align-items:flex-start;padding:10px 14px;border-bottom:1px dashed ${TICKET.border};background:#fff8e1;">
+<div class="email-info-row" style="display:flex;align-items:flex-start;padding:10px 14px;border-bottom:1px dashed ${TICKET.border};background:#fff8e1;">
   <div style="min-width:130px;font-size:12px;font-weight:600;color:#7a5200;display:flex;align-items:center;padding-right:8px;">${iconSvg}${label}</div>
   <div style="font-size:13px;font-weight:700;color:${TICKET.stub};flex:1;">${value}</div>
 </div>`;
@@ -313,7 +307,7 @@ const alertBox = (message, type = "info") => {
   };
   const t = types[type] || types.info;
   return `
-<div style="margin:16px 0;background:${t.bg};border-left:4px solid ${t.border};border-radius:0 10px 10px 0;padding:14px 18px;display:flex;align-items:flex-start;">
+<div class="email-alert-box" style="margin:16px 0;background:${t.bg};border-left:4px solid ${t.border};border-radius:0 10px 10px 0;padding:14px 18px;display:flex;align-items:flex-start;">
   ${t.icon}
   <p style="margin:0;font-size:13px;line-height:1.6;color:${t.color};">${message}</p>
 </div>`;
@@ -321,7 +315,7 @@ const alertBox = (message, type = "info") => {
 
 // Step item — div-based
 const stepItem = (step, i, total) => `
-<div style="display:flex;align-items:center;padding:10px 0;${i < total - 1 ? `border-bottom:1px dashed ${TICKET.border};` : ""}">
+<div class="email-step-item" style="display:flex;align-items:center;padding:10px 0;${i < total - 1 ? `border-bottom:1px dashed ${TICKET.border};` : ""}">
   <div style="width:28px;height:28px;flex-shrink:0;background:${i === 0 ? TICKET.stub : TICKET.goldPale};border:2px solid ${i === 0 ? TICKET.goldDark : TICKET.border};border-radius:50%;text-align:center;line-height:24px;font-size:11px;font-weight:800;color:${i === 0 ? TICKET.gold : TICKET.goldDark};margin-right:12px;">${i + 1}</div>
   <p style="margin:0;font-size:13px;color:${i === 0 ? TICKET.stub : "#7a5200"};font-weight:${i === 0 ? "700" : "500"};">${step}</p>
 </div>`;
