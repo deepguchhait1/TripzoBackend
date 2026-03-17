@@ -26,6 +26,7 @@ import uploadRoutes from "./routes/upload.js";
 
 const app = express();
 
+
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
