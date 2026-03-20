@@ -26,6 +26,7 @@ import statsRoutes from "./routes/stats.js";
 import searchRoutes from "./routes/search.js";
 import subscribersRoutes from "./routes/subscribers.js";
 import uploadRoutes from "./routes/upload.js";
+import { log } from "console";
 
 const app = express();
 
@@ -36,7 +37,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   "https://tripzo-frontend.vercel.app", // Explicitly add your Vercel domain
 ].filter(Boolean);
-
+console.log("Allowed CORS origins:", allowedOrigins);
 app.use(
   cors({
     origin: allowedOrigins,
