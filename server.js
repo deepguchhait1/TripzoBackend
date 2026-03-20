@@ -11,6 +11,9 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+
+
 import authRoutes from "./routes/auth.js";
 import adminsRoutes from "./routes/admins.js";
 import destinationsRoutes from "./routes/destinations.js";
@@ -64,9 +67,19 @@ app.use("/api/search", searchRoutes);
 app.use("/api/subscribers", subscribersRoutes);
 app.use("/api/upload", uploadRoutes);
 
+// Test route
+app.get("/api/test", (req, res) => {
+  res.json({ test: 'Routes working!', timestamp: new Date() });
+});
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date() });
+});
+
+// 404 handler with log
+app.use((req, res) => {
+  console.log('404 hit for:', req.method, req.originalUrl);
+  res.status(404).json({ message: "Route not found" });
 });
 
 // Connect DB & Start Server

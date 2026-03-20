@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -30,6 +31,13 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "confirmed", "cancelled", "completed"],
       default: "pending",
+    },
+    trackingId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
+      default: () => crypto.randomBytes(12).toString("hex"),
     },
   },
   { timestamps: true }

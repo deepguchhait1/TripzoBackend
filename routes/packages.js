@@ -7,6 +7,7 @@ const router = express.Router();
 
 // GET /api/packages — Public
 router.get("/", async (req, res) => {
+  console.log('PACKAGES ROUTE HIT:', req.query);
   try {
     const { category, search, limit, sort, minPrice, maxPrice, minRating, duration } = req.query;
     const filter = { active: true };
@@ -77,16 +78,19 @@ router.get("/:id", async (req, res) => {
 // POST /api/packages — Admin
 router.post("/", auth, async (req, res) => {
   try {
-    const pkg = await Package.create(req.body);
+    const { sendEmail, ...packageData } = req.body;
+    const pkg = await Package.create(packageData);
 
-    // Notify all active subscribers (non-blocking)
-    Subscriber.find({ active: true }).then((subscribers) => {
-      subscribers.forEach((sub) => {
-        sendNewPackageNotification(sub.email, pkg).catch((err) =>
-          console.warn(`Package notification to ${sub.email} failed:`, err.message)
-        );
-      });
-    }).catch((err) => console.warn("Failed to fetch subscribers:", err.message));
+    // Only send email if admin requests (sendEmail flag true)
+    if (sendEmail) {
+      Subscriber.find({ active: true }).then((subscribers) => {
+        subscribers.forEach((sub) => {
+          sendNewPackageNotification(sub.email, pkg).catch((err) =>
+            console.warn(`Package notification to ${sub.email} failed:`, err.message)
+          );
+        });
+      }).catch((err) => console.warn("Failed to fetch subscribers:", err.message));
+    }
 
     res.status(201).json(pkg);
   } catch (error) {

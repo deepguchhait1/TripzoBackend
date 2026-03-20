@@ -1,6 +1,7 @@
 import "dotenv/config";
 import nodemailer from "nodemailer";
 import dns from "dns";
+import QRCode from "qrcode";
 
 dns.setDefaultResultOrder("ipv4first");
 
@@ -322,58 +323,139 @@ const stepItem = (step, i, total) => `
 
 // ───── Email Templates ─────
 
+// ───── QR Code Generation (External URL) ─────
 /**
- * Booking Confirmation Email
+ * Generate QR Code URL fallback (when inline attachment generation fails)
+ */
+const generateQRCodeUrl = (data) => {
+  try {
+    const encodedData = encodeURIComponent(data);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedData}`;
+  } catch (error) {
+    console.error("QR Code URL generation failed:", error);
+    return null;
+  }
+};
+
+const QR_TRACKING_CID = "tripzo-tracking-qr";
+
+/**
+ * Generate inline QR image attachment for broad email client support
+ */
+const generateQRCodeInlineAttachment = async (data) => {
+  try {
+    const content = await QRCode.toBuffer(data, {
+      type: "png",
+      width: 240,
+      margin: 1,
+      color: { dark: "#1A1A1A", light: "#FFFFFF" },
+    });
+
+    return {
+      filename: "tripzo-tracking-qr.png",
+      content,
+      cid: QR_TRACKING_CID,
+      contentType: "image/png",
+    };
+  } catch (error) {
+    console.error("Inline QR generation failed:", error.message);
+    return null;
+  }
+};
+
+/**
+ * Professional Travel-Themed Booking Confirmation Email with Interactive QR Code
  */
 const sendBookingConfirmation = async (booking) => {
-  const tripName = booking.packageTitle || booking.destinationTitle || "Your Trip";
-  const steps = ["Expert reviews your request", "Personalized itinerary is crafted", "We send you pricing &amp; details", "Confirm &amp; start your adventure!"];
+  const tripName = booking.packageTitle || booking.destinationTitle || "Your Amazing Journey";
+  const trackingUrl = `${BRAND.url}/track/${booking.trackingId}`;
+  const qrCodeUrl = generateQRCodeUrl(trackingUrl);
+  const qrAttachment = await generateQRCodeInlineAttachment(trackingUrl);
 
   const html = baseTemplate(`
-    <p style="margin:0 0 4px;font-size:14px;color:#7a5200;">Hello,</p>
-    <h2 style="margin:0 0 8px;font-size:24px;font-weight:900;color:${TICKET.stub};font-family:${TICKET.serif};">Your Booking is Received!</h2>
-    <p style="margin:0 0 22px;font-size:15px;line-height:1.7;color:#7a5200;">
-      Thank you, <strong style="color:${TICKET.stub}">${booking.name}</strong>. We've received your booking request for <strong style="color:${TICKET.goldDark}">${tripName}</strong> and our travel experts are already on it.
+    <p style="margin:0 0 2px;font-size:13px;color:${TICKET.goldDark};font-weight:600;">Hello <strong style="color:${TICKET.stub};">${booking.name}</strong>,</p>
+    <h2 style="margin:8px 0 16px;font-size:28px;font-weight:900;color:${TICKET.stub};font-family:${TICKET.serif};">✈️ Your Journey Begins!</h2>
+    <p style="margin:0 0 20px;font-size:15px;line-height:1.8;color:#5c3d00;">
+      We're thrilled to confirm your booking for <strong style="color:${TICKET.goldDark};font-size:16px;">${tripName}</strong>. Our travel experts are already crafting your perfect itinerary. Every moment of your adventure awaits!
     </p>
 
-    <div style="background:${TICKET.stub};border:2px solid ${TICKET.goldDark};border-radius:12px;padding:18px 22px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <p style="margin:0 0 4px;font-size:10px;color:${TICKET.stubMuted};text-transform:uppercase;letter-spacing:2px;font-weight:700;">Booking Status</p>
-        <p style="margin:0;font-size:20px;font-weight:800;color:${TICKET.gold};font-family:${TICKET.serif};">Under Review</p>
+    <!-- PREMIUM QR CODE SECTION WITH BORDER -->
+    <div style="background:linear-gradient(135deg, #fff8e1 0%, #fffbe6 100%);border:3px solid ${TICKET.goldDark};border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;box-shadow:0 4px 12px rgba(200,134,10,0.15);">
+      <p style="margin:0 0 4px;font-size:11px;font-weight:800;color:${TICKET.goldDark};text-transform:uppercase;letter-spacing:2px;">📱 Scan Your Travel Pass</p>
+      <p style="margin:0 0 14px;font-size:13px;color:#6a4c00;">Keep this QR code handy to track your booking anytime, anywhere</p>
+      ${(qrAttachment || qrCodeUrl) ? `<img src="${qrAttachment ? `cid:${QR_TRACKING_CID}` : qrCodeUrl}" alt="Booking QR Code - Scan to Track" style="width:140px;height:140px;border:3px solid ${TICKET.goldDark};border-radius:12px;margin:0 auto 12px;display:block;"/>` : ""}
+      <div style="background:white;border:2px dashed ${TICKET.goldDark};border-radius:8px;padding:12px;margin:0 0 12px;text-align:center;">
+        <p style="margin:0 0 6px;font-size:10px;color:#6a4c00;font-weight:700;">BOOKING ID</p>
+        <p style="margin:0;font-size:12px;font-weight:800;color:${TICKET.stub};font-family:'Courier New',monospace;letter-spacing:2px;word-break:break-all;">${booking.trackingId}</p>
       </div>
-      <div style="width:44px;height:44px;background:${TICKET.gold};border-radius:10px;display:flex;align-items:center;justify-content:center;">
-        ${ICONS.clock}
+      <p style="margin:0;font-size:11px;color:#6a4c00;">🔗 Or visit: <a href="${trackingUrl}" style="color:${TICKET.stub};text-decoration:none;font-weight:700;">${BRAND.url}/track</a></p>
+    </div>
+
+    <!-- LIVE STATUS TRACKER -->
+    <div style="background:linear-gradient(to right, ${TICKET.stub}, #2d2d2d);border-radius:12px;padding:20px;margin-bottom:24px;text-align:center;color:white;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;opacity:0.9;">Booking Status</p>
+      <p style="margin:0;font-size:24px;font-weight:900;font-family:${TICKET.serif};color:${TICKET.gold};">⏳ Under Review</p>
+      <p style="margin:8px 0 0;font-size:12px;opacity:0.8;">Our travel expert will contact you within <strong>24 hours</strong></p>
+    </div>
+
+    <!-- TRAVEL DETAILS CARD -->
+    ${sectionTitle("📋 Your Travel Details")}
+    <div style="border-radius:12px;overflow:hidden;border:2px solid ${TICKET.border};margin-bottom:18px;background:#fff8e1;">
+      ${infoRow("🌍 Destination", tripName || "TBD", "")}
+      ${booking.packageTitle ? infoRow("📦 Package", booking.packageTitle, "") : ""}
+      ${booking.destinationTitle ? infoRow("🗺️ Location", booking.destinationTitle, "") : ""}
+      ${infoRow("📅 Travel Date", formatDate(booking.travelDate), "")}
+      ${infoRow("👥 Travelers", booking.travelers + (booking.travelers > 1 ? " people" : " person"), "")}
+      ${infoRow("💰 Total Price", `₹${booking.totalPrice?.toLocaleString("en-IN") || "Calculating..."}`, "")}
+      ${infoRow("📞 Contact", booking.phone, "")}
+      ${booking.specialRequests ? infoRow("📝 Special Requests", booking.specialRequests, "") : ""}
+    </div>
+
+    <!-- EXCITING FEATURES BOX -->
+    <div style="background:linear-gradient(135deg, #fef3c7 0%, #fff8e1 100%);border-left:5px solid ${TICKET.gold};border-radius:8px;padding:18px;margin-bottom:20px;">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:800;color:${TICKET.stub};">✨ What Makes Your Journey Special</p>
+      <div style="font-size:13px;color:#5c3d00;line-height:1.8;">
+        <p style="margin:6px 0;">✓ Expert local guides who know every hidden gem</p>
+        <p style="margin:6px 0;">✓ Personalized itinerary tailored to your interests</p>
+        <p style="margin:6px 0;">✓ 24/7 travel support during your adventure</p>
+        <p style="margin:6px 0;">✓ Exclusive access to premium destinations</p>
       </div>
     </div>
 
-    ${sectionTitle("Booking Details")}
-    <div style="border-radius:10px;overflow:hidden;border:1px solid ${TICKET.border};margin-bottom:18px;">
-      ${infoRow("Trip", tripName, ICONS.map)}
-      ${booking.packageTitle ? infoRow("Package", booking.packageTitle, ICONS.pkg) : ""}
-      ${booking.destinationTitle ? infoRow("Destination", booking.destinationTitle, ICONS.pin) : ""}
-      ${infoRow("Travel Date", formatDate(booking.travelDate), ICONS.cal)}
-      ${infoRow("Travelers", booking.travelers + (booking.travelers > 1 ? " persons" : " person"), ICONS.users)}
-      ${infoRow("Contact", booking.phone, ICONS.phone)}
-      ${booking.specialRequests ? infoRow("Special Requests", booking.specialRequests, ICONS.note) : ""}
-    </div>
-
-    ${alertBox("Our travel expert will contact you within <strong>24 hours</strong> with a personalized itinerary and payment details.", "info")}
-
-    ${sectionTitle("What Happens Next")}
+    <!-- JOURNEY TIMELINE -->
+    ${sectionTitle("🚀 Your Journey Timeline")}
     <div style="margin-bottom:22px;">
-      ${steps.map((s, i) => stepItem(s, i, steps.length)).join("")}
+      ${stepItem("✅ Booking Received & Confirmed", 0, 4)}
+      ${stepItem("👨‍💼 Expert Review Your Preferences", 1, 4)}
+      ${stepItem("🗺️ Custom Itinerary Created", 2, 4)}
+      ${stepItem("🎉 Adventure Begins!", 3, 4)}
     </div>
 
-    <div style="text-align:center;padding:8px 0;">
-      ${ctaButton("Explore More Packages", BRAND.url + "/packages")}
+    <!-- CTA BUTTONS -->
+    <div style="text-align:center;padding:16px 0;margin-bottom:20px;">
+      <p style="margin:0 0 14px;">
+        <a href="${trackingUrl}" style="display:inline-block;background:${TICKET.gold};color:${TICKET.stub};padding:14px 40px;border-radius:8px;text-decoration:none;font-weight:800;font-size:14px;letter-spacing:1px;">📍 TRACK YOUR BOOKING</a>
+      </p>
+      <p style="margin:0;">
+        <a href="${BRAND.url}/packages" style="display:inline-block;background:${TICKET.stub};color:${TICKET.gold};padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;margin-top:8px;">Explore More Adventures</a>
+      </p>
     </div>
-  `, `Hi ${booking.name}, your booking for ${tripName} has been received!`, ICONS.plane);
+
+    <!-- REASSURANCE BOX -->
+    ${alertBox("🛡️ Your booking is secure and confirmed. You'll receive updates about your itinerary and travel details soon. Have questions? Reply to this email!", "success")}
+
+    <!-- FOOTER MESSAGE -->
+    <p style="margin:20px 0 0;font-size:12px;color:${TICKET.goldDark};text-align:center;font-style:italic;">
+      "Travel is the only thing you pay for that makes you richer." - We can't wait to enrich your life with this adventure!
+    </p>
+  `, `${booking.name}, Your ${tripName} Adventure is Confirmed! 🌍`, ICONS.plane);
 
   return transporter.sendMail({
     from: `"${BRAND.name}" <${process.env.SMTP_EMAIL}>`,
     to: booking.email,
     subject: `Booking Received — ${tripName} | ${BRAND.name}`,
     html,
+    attachments: qrAttachment ? [qrAttachment] : [],
   });
 };
 
@@ -384,6 +466,9 @@ const sendBookingStatusUpdate = async (booking) => {
   const tripName = booking.packageTitle || booking.destinationTitle || "Your Trip";
   const status = booking.status;
   const sc = statusConfig[status] || statusConfig.pending;
+  const trackingUrl = `${BRAND.url}/track/${booking.trackingId}`;
+  const qrCodeUrl = generateQRCodeUrl(trackingUrl);
+  const qrAttachment = await generateQRCodeInlineAttachment(trackingUrl);
 
   const messages = {
     pending:   `Your booking for <strong>${tripName}</strong> is under review. Our travel experts will reach out within 24 hours.`,
@@ -404,6 +489,14 @@ const sendBookingStatusUpdate = async (booking) => {
     <p style="margin:0 0 4px;font-size:14px;color:#7a5200;">Hello <strong style="color:${TICKET.stub}">${booking.name}</strong>,</p>
     <h2 style="margin:0 0 8px;font-size:24px;font-weight:900;color:${TICKET.stub};font-family:${TICKET.serif};">Booking ${sc.label}</h2>
     <p style="margin:0 0 22px;font-size:15px;line-height:1.7;color:#7a5200;">${messages[status] || "Your booking status has been updated."}</p>
+
+    <div style="background:linear-gradient(135deg, #fff8e1 0%, #fffbe6 100%);border:2px solid ${TICKET.goldDark};border-radius:12px;padding:16px;margin-bottom:20px;text-align:center;">
+      <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:${TICKET.goldDark};text-transform:uppercase;letter-spacing:1.5px;">Track Your Booking</p>
+      ${(qrAttachment || qrCodeUrl) ? `<img src="${qrAttachment ? `cid:${QR_TRACKING_CID}` : qrCodeUrl}" alt="Track Booking QR Code" style="width:120px;height:120px;border:2px solid ${TICKET.goldDark};border-radius:8px;margin:0 auto 10px;display:block;" />` : ""}
+      <p style="margin:0 0 6px;font-size:11px;color:#6a4c00;">Scan QR or use your tracking ID</p>
+      <p style="margin:0;font-size:11px;font-weight:700;color:${TICKET.stub};font-family:${TICKET.mono};word-break:break-all;">${booking.trackingId}</p>
+      <p style="margin:8px 0 0;font-size:11px;color:#6a4c00;">Link: <a href="${trackingUrl}" style="color:${TICKET.stub};text-decoration:none;font-weight:700;">Track now</a></p>
+    </div>
 
     <div style="background:${TICKET.stub};border:2px solid ${TICKET.goldDark};border-radius:12px;padding:18px 22px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;">
       <div>
@@ -433,6 +526,7 @@ const sendBookingStatusUpdate = async (booking) => {
     to: booking.email,
     subject: `Booking ${sc.label} — ${tripName} | ${BRAND.name}`,
     html,
+    attachments: qrAttachment ? [qrAttachment] : [],
   });
 };
 

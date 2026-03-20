@@ -4,6 +4,62 @@ import auth from "../middleware/auth.js";
 import { sendBookingConfirmation, sendBookingStatusUpdate, sendAdminNewBookingAlert, sendBookingReply } from "../services/emailService.js";
 const router = express.Router();
 
+// GET /api/bookings/track/:trackingId — Public (tracking by QR code)
+router.get("/track/:trackingId", async (req, res) => {
+  try {
+    const booking = await Booking.findOne({ trackingId: req.params.trackingId })
+      .populate("packageId", "title duration price image highlights")
+      .populate("destinationId", "title description image price");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Return only public-safe booking information
+    const response = {
+      id: booking._id,
+      name: booking.name,
+      email: booking.email.replace(/(.{2})(.*)(@.*)/, '$1****$3'), // Mask email
+      phone: booking.phone.replace(/(\d{2})(\d*)(\d{2})/, '$1****$3'), // Mask phone
+      tripName: booking.packageTitle || booking.destinationTitle,
+      package: booking.packageId
+        ? {
+            title: booking.packageId.title,
+            duration: booking.packageId.duration,
+            price: booking.packageId.price,
+            image: booking.packageId.image,
+            highlights: booking.packageId.highlights?.slice(0, 3),
+          }
+        : null,
+      destination: booking.destinationId
+        ? {
+            title: booking.destinationId.title,
+            description: booking.destinationId.description?.slice(0, 150),
+            image: booking.destinationId.image,
+            price: booking.destinationId.price,
+          }
+        : null,
+      travelers: booking.travelers,
+      travelDate: booking.travelDate,
+      totalPrice: booking.totalPrice,
+      status: booking.status,
+      statusLabel: {
+        pending: "Awaiting Confirmation",
+        confirmed: "Confirmed & Ready",
+        cancelled: "Booking Cancelled",
+        completed: "Journey Completed",
+      }[booking.status],
+      createdAt: booking.createdAt,
+      specialRequests: booking.specialRequests,
+      trackingId: booking.trackingId,
+    };
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
 // POST /api/bookings — Public (submit booking)
 router.post("/", async (req, res) => {
   try {
