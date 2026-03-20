@@ -1,4 +1,3 @@
-dotenv.config();
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -6,14 +5,13 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Initialize dotenv once
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-
-
+// Route Imports
 import authRoutes from "./routes/auth.js";
 import adminsRoutes from "./routes/admins.js";
 import destinationsRoutes from "./routes/destinations.js";
@@ -26,41 +24,42 @@ import statsRoutes from "./routes/stats.js";
 import searchRoutes from "./routes/search.js";
 import subscribersRoutes from "./routes/subscribers.js";
 import uploadRoutes from "./routes/upload.js";
-import { log } from "console";
 
 const app = express();
 
-
-// Middleware
+// 1. Define Allowed Origins
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://tripzo-frontend.vercel.app",
   process.env.FRONTEND_URL,
-  "https://tripzo-frontend.vercel.app", // Explicitly add your Vercel domain
 ].filter(Boolean);
+
 console.log("Allowed CORS origins:", allowedOrigins);
+
+// 2. Configure CORS Middleware (This replaces your manual header block)
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
     credentials: true,
   })
 );
-// Fallback CORS header for all responses
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  } else {
-    res.header("Access-Control-Allow-Origin", allowedOrigins[0] || "*");
-  }
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
+
+// 3. Standard Middleware
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
+// 4. API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admins", adminsRoutes);
 app.use("/api/destinations", destinationsRoutes);
@@ -74,22 +73,22 @@ app.use("/api/search", searchRoutes);
 app.use("/api/subscribers", subscribersRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// Test route
+// Test & Health Routes
 app.get("/api/test", (req, res) => {
   res.json({ test: 'Routes working!', timestamp: new Date() });
 });
-// Health check
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date() });
 });
 
-// 404 handler with log
+// 404 handler
 app.use((req, res) => {
   console.log('404 hit for:', req.method, req.originalUrl);
   res.status(404).json({ message: "Route not found" });
 });
 
-// Connect DB & Start Server
+// 5. Connect DB & Start Server
 const PORT = process.env.PORT || 5000;
 
 mongoose
